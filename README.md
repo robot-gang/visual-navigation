@@ -44,7 +44,7 @@ channel_priority: strict
 - Install the new package
     + e.g., `conda install numpy`
 - Update the environment.yml
-    + `conda env export --from-history > environment.yml`
+    + `conda env export --from-history | grep -v "prefix" > environment.yml`
 - Add and commit the change to master
 
 ## Coding
