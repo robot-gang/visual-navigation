@@ -1,9 +1,4 @@
-# Visual Navigation in Dynamic Environments for Mobile Robots
-
-The website: TODO
-
-This is the final project of EECS C106B/206B | Robotic Manipulation and
-Interaction course at UC Berkeley, Spring 2020.
+# This repository contains the codebase for the website.
 
 # Members
 
@@ -12,3 +7,12 @@ Interaction course at UC Berkeley, Spring 2020.
 - Yuanrong Han
 - Shawn Shacterman
 
+# How to develop this website?
+
+## Setting things up
+
+TODO
+
+## Making changes
+
+TODO
