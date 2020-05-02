@@ -49,6 +49,7 @@ channel_priority: strict
 
 ## Coding
 
+- Python version: 3.7
 - Branches
     + master: the master branch
     + gh-pages: the website
