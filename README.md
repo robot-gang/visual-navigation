@@ -66,3 +66,4 @@ channel_priority: strict
     + Put an empty `__init__.py` in every folder that you created to
     make it as a Python module. We can import and use these folders as
     normal Python modules/packages.
+- Python docstring format: reStructuredText
