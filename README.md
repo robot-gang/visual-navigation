@@ -30,6 +30,8 @@ following steps.
 
 - Make sure your `~/.condarc` (conda configuration file, it is in your
   home folder) has these lines:
+    + Make sure the channel `defaults` above the channel `conda-forge`
+    the same order as the following lines
 
 ```.condarc
 channels:
