@@ -43,8 +43,14 @@ channel_priority: strict
 - Pull the latest code from the repository: `git pull`
     + If there are conflicts, you should resolve them all before doing
     the next step.
-- Install the new package
-    + e.g., `conda install numpy`
+- Run this following command (at the same directory level with the
+  environment.yml file) to get the new changes from other people
+    + `conda env update -n visual_nav -f environment.yml`
+- Search for the latest version of your package
+    + e.g., `conda search numpy`
+    + e.g., the latest of numpy is 1.18.1
+- Install the new package with the first two parts of the version
+    + e.g., `conda install numpy=1.18`
 - Update the environment.yml
     + `conda env export --from-history | grep -v "prefix" > environment.yml`
 - Add and commit the change to master
