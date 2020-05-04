@@ -29,7 +29,7 @@ class Localization(object):
         self.distortion_coeffs = distortion_coeffs
         self.aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
     
-        # Store the latest useful graysacle image and depth information
+        # Store the latest useful grayscale image and depth information
         self.prev_gray=None
         self.prev_depth=None
 
