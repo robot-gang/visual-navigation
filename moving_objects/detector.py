@@ -7,6 +7,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import skvideo.io as io
 
 detectors = {'fast' : cv2.FastFeatureDetector_create(),
              'star' : cv2.xfeatures2d.StarDetector_create(),
@@ -27,6 +28,7 @@ descriptors = {'brief' : cv2.xfeatures2d.BriefDescriptorExtractor_create(),
 
 matchers = {'bruteForce': cv2.BFMatcher(cv2.NORM_HAMMING),
             'flann'     : cv2.FlannBasedMatcher_create()}
+
 cameraMat = np.array([[317.73273, 0, 319.9013], [0, 317.73273, 177.84988], [0, 0, 1]])
 
 class Detector:
@@ -162,43 +164,75 @@ class Detector:
             return R, T, bestInliers
 
 
-    def create_mask(self, numFeatures = 400, minFeatures = 10):
+    def detect(self):
         """
-        create a mask for the moving objects
-        :param numFeatures: the number of features used in calculation ranked distance
-        :param minFeatures: minimum number of features before stopping RANSAC
-        :return: a mask
+        detect the moving objects bases on img1 and img2
+        :return: a binary image with static environment 0 and moving objects 1
         """
         # extract and match features
         kp1, des1, kp2, des2 = self.feature_extraction()
-        # matches = self.fMatcher.match(des2, des1)
-        matches = self.fMatcher.knnMatch(des2, des1, k=3)
-        matches = sorted(matches, key=lambda x: x.distance)[:numFeatures]
+        matches = self.fMatcher.knnMatch(des2, des1, k=2)
 
-        if self.depth1 is not None:
-            # compute local 3D coordinates of features
-            kp1, kp2 = self.compute3D(matches, kp1, kp2)
+        # apply ratio test
+        good = []
+        for m, n in matches:
+            if m.distance < 0.75 * n.distance:
+                good.append(m)
 
-        Rs, Ts,  = [], []
+        # extract pixel coordinates of good matched features
+        num = len(good)
+        pts1 = np.zeros((num, 2), dtype=np.float32)
+        pts2 = np.zeros((num, 2), dtype=np.float32)
 
-        while True:
-            R, T, inliers = self.estimate_rigid_transform(kp1, kp2)
-            fig, ax = plt.subplot(1, 2, figsize=(10, 5))
-            ax[0].imshow(self.img1)
-            ax[0].scatter(kp1[inliers][:, 0], kp1[inliers][:, 1])
+        for i, match in enumerate(good):
+            pts1[i, :] = kp1[match.trainIdx].pt
+            pts2[i, :] = kp2[match.queryIdx].pt
 
-            ax[1].imshow(self.img2)
-            ax[1].scatter(kp2[inliers][:, 0], kp2[inliers][:, 1])
-            plt.imshow()
+        # compute homography
+        H, mask = cv2.findHomography(pts1, pts2, cv2.RANSAC)
+        size = self.img1.shape
+        img1 = cv2.warpPerspective(self.img1, H, (size[1], size[0]))
+
+        # compare the warpped image with self.img2
+        # apply gaussianblur to smooth the images
+        img1_blur = cv2.GaussianBlur(img1, (5, 5), 0)
+        img2_blur = cv2.GaussianBlur(self.img2, (5, 5), 0)
+
+        # bias/gain normalization
+        img1 = (img1_blur - np.mean(img1_blur)) / np.std(img1_blur)
+        img2 = (img2_blur - np.mean(img2_blur)) / np.std(img2_blur)
+
+        diff = (np.abs(img1 - img2) * 255).astype(np.uint8)
+        if np.max(diff) - np.min(diff) >= 250:
+            result = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        else:
+            result = np.zeros(img2.shape)
+
+        return result
 
 
-            Rs.append(R)
-            Ts.append(T)
+def main():
+    filename = 'videos/walking.MOV'
+    video = io.vread(filename, as_grey=True)
 
-            idx = np.where(inliers==0)
-            kp1 = kp1[idx]
-            kp2 = kp2[idx]
+    imgs = []
+    failure = 0
+    for i, frame in enumerate(video):
+        frame = frame[:, :, 0]
+        if i < 3:
+            detected = np.zeros(frame.shape)
+        else:
+            try:
+                det = Detector(video[i-3], frame)
+                detected = det.detect()
+            except:
+                failure += 1
+                detected = np.zeros(frame.shape)
 
-            if R is None and len(idx[0]) < minFeatures:
-                break
+        img = np.vstack((frame, detected))
+        imgs.append(img)
+    print("failure: ", failure)
+    io.vwrite('walking_detected.MOV', imgs)
 
+if __name__ == "__main__":
+    main()
