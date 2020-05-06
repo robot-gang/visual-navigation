@@ -6,13 +6,31 @@
 # img1 is train, img2 is query
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
-detectors = {'fast' : cv2.FastFeatureDetector_create()}
-descriptors = {'brief' : cv2.xfeatures2d.BriefDescriptorExtractor_create()}
-matchers = {'bruteForce': cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)}
+detectors = {'fast' : cv2.FastFeatureDetector_create(),
+             'star' : cv2.xfeatures2d.StarDetector_create(),
+             'brisk': cv2.BRISK_create(),
+             'orb'  : cv2.ORB_create(),
+             'mser' : cv2.MSER_create(),
+             'gftt' : cv2.GFTTDetector_create(),
+             'blob' : cv2.SimpleBlobDetector_create()}
+
+descriptors = {'brief' : cv2.xfeatures2d.BriefDescriptorExtractor_create(),
+               'orb'   : cv2.ORB_create(),
+               'daisy' : cv2.xfeatures2d.DAISY_create(),
+               'boost' : cv2.xfeatures2d.BoostDesc_create(),
+               'freak' : cv2.xfeatures2d.FREAK_create(),
+               'latch' : cv2.xfeatures2d.LATCH_create(),
+               'lucid' : cv2.xfeatures2d.LUCID_create(),
+               'vgg'   : cv2.xfeatures2d.VGG_create()}
+
+matchers = {'bruteForce': cv2.BFMatcher(cv2.NORM_HAMMING),
+            'flann'     : cv2.FlannBasedMatcher_create()}
+cameraMat = np.array([[317.73273, 0, 319.9013], [0, 317.73273, 177.84988], [0, 0, 1]])
 
 class Detector:
-    def __init__(self, im1, im2, cameraMatrix, depth1=None, depth2=None, detector='fast', descriptor='brief', matcher='bruteForce'):
+    def __init__(self, im1, im2, depth1=None, depth2=None, cameraMatrix=cameraMat, detector='fast', descriptor='brief', matcher='bruteForce'):
         self.img1 = im1
         self.img2 = im2
         self.camMat = cameraMatrix
@@ -46,25 +64,21 @@ class Detector:
         """
         # find the pixel coordinates of keypoints, dim n x 3
         kp1Pix = [kp1[m.trainIdx].pt for m in matches]
-        kp1Pix = np.hstack((kp1Pix, np.ones(len(kp1Pix))))
+        kp1Pix = np.hstack((kp1Pix, np.ones((len(kp1Pix), 1))))
 
         kp2Pix = [kp2[m.queryIdx].pt for m in matches]
-        kp2Pix = np.hstack((kp2Pix, np.ones(len(kp2Pix))))
-
-        # cur_2d = np.asarray([[kp1[match.queryIdx].pt[0], kp1[match.queryIdx].pt[1], 1] for match in matches]).T
-        # prev_2d =  np.asarray([[kp2[match.trainIdx].pt[0], kp2[match.trainIdx].pt[1], 1] for match in matches]).T
+        kp2Pix = np.hstack((kp2Pix, np.ones((len(kp2Pix), 1))))
 
         # get the depth info of each point, n x n
-        xIdx1, yIdx1 = kp1Pix[:, 0], kp1Pix[:, 1]
+        xIdx1, yIdx1 = (kp1Pix[:, 0]).astype(int), (kp1Pix[:, 1]).astype(int)
         d1 = np.diag(self.depth1[yIdx1, xIdx1])
-        xIdx2, yIdx2 = kp2Pix[:, 0], kp2Pix[:, 1]
+        xIdx2, yIdx2 = (kp2Pix[:, 0]).astype(int), (kp2Pix[:, 1]).astype(int)
         d2 = np.diag(self.depth2[yIdx2, xIdx2])
 
-        # current_depth = np.diag(cur_depth[cur_2d[1].astype(int), cur_2d[0].astype(int)])
-        # previous_depth = np.diag(self.prev_depth[prev_2d[1].astype(int), prev_2d[0].astype(int)])
         cmInv = np.linalg.pinv(self.camMat)
-        kp1Local3D = d1 @ kp1Pix @ cmInv
-        kp2Local3D = d2 @ kp2Pix @ cmInv
+        kp1Local3D = d1 @ kp1Pix @ cmInv.T
+        kp2Local3D = d2 @ kp2Pix @ cmInv.T
+
         return kp1Local3D, kp2Local3D
 
     def get_rigid_transform(self, A, B):
@@ -86,8 +100,8 @@ class Detector:
             raise Exception("matrix B is not 3xN, it is {}x{}".format(num_rows, num_cols))
 
         # find mean column wise
-        centroid_A = np.mean(A, axis=1)
-        centroid_B = np.mean(B, axis=1)
+        centroid_A = np.mean(A, axis=1).reshape((3, 1))
+        centroid_B = np.mean(B, axis=1).reshape((3, 1))
 
         # subtract mean
         Am = A - centroid_A
@@ -110,7 +124,7 @@ class Detector:
         return R, t.reshape((3, 1))
 
 
-    def estimate_rigid_transform(self, kp1, kp2, numIter = 100, tolerance = 30, inlierBound = 10):
+    def estimate_rigid_transform(self, kp1, kp2, numIter = 100, tolerance = 50, inlierBound = 10):
         """
         find the best R, T between kp2 and kp1, R @ kp1 + t = kp2
         :param kp1: n X 3 matrix of 3d points in img1
@@ -144,7 +158,8 @@ class Detector:
             return None, None, None
         else:
             idx = np.where(bestInliers > 0)[0]
-            return self.get_rigid_transform(kp1.T[:, idx], kp2.T[:, idx]), bestInliers
+            R, T = self.get_rigid_transform(kp1.T[:, idx], kp2.T[:, idx])
+            return R, T, bestInliers
 
 
     def create_mask(self, numFeatures = 400, minFeatures = 10):
@@ -156,15 +171,29 @@ class Detector:
         """
         # extract and match features
         kp1, des1, kp2, des2 = self.feature_extraction()
-        matches = self.fMatcher.match(des2, des1)
+        # matches = self.fMatcher.match(des2, des1)
+        matches = self.fMatcher.knnMatch(des2, des1, k=3)
         matches = sorted(matches, key=lambda x: x.distance)[:numFeatures]
 
         if self.depth1 is not None:
             # compute local 3D coordinates of features
             kp1, kp2 = self.compute3D(matches, kp1, kp2)
 
+        Rs, Ts,  = [], []
+
         while True:
-            R, t, inliers = self.estimate_rigid_transform(kp1, kp2)
+            R, T, inliers = self.estimate_rigid_transform(kp1, kp2)
+            fig, ax = plt.subplot(1, 2, figsize=(10, 5))
+            ax[0].imshow(self.img1)
+            ax[0].scatter(kp1[inliers][:, 0], kp1[inliers][:, 1])
+
+            ax[1].imshow(self.img2)
+            ax[1].scatter(kp2[inliers][:, 0], kp2[inliers][:, 1])
+            plt.imshow()
+
+
+            Rs.append(R)
+            Ts.append(T)
 
             idx = np.where(inliers==0)
             kp1 = kp1[idx]
