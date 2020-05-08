@@ -6,7 +6,7 @@
 # img1 is train, img2 is query
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import skvideo.io as io
 
 detectors = {'fast' : cv2.FastFeatureDetector_create(),
@@ -43,10 +43,11 @@ class Detector:
         self.fDescriptor = descriptors[descriptor]
         self.fMatcher = matchers[matcher]
 
-    def feature_extraction(self):
+    def match(self):
         """
         Extract the features of self.img1 and self.img2 using FAST detector and BRIEF descriptor
-        :return:
+        and match features using KNN and ratio test
+        :return: keypoints in img1, keypoints in img2, and good matches
         """
         kp1 = self.fDetector.detect(self.img1, None)
         kp1, des1 = self.fDescriptor.compute(self.img1, kp1)
@@ -54,11 +55,19 @@ class Detector:
         kp2 = self.fDetector.detect(self.img2, None)
         kp2, des2 = self.fDescriptor.compute(self.img2, kp2)
 
-        return kp1, des1, kp2, des2
+        matches = self.fMatcher.knnMatch(des2, des1, k=2)
+
+        # apply ratio test
+        good = []
+        for m, n in matches:
+            if m.distance < 0.75 * n.distance:
+                good.append(m)
+
+        return kp1, kp2, good
 
     def compute3D(self, matches, kp1, kp2):
         """
-        compute the local 3d points
+        compute the local 3d coordinates of keypoints
         :param matches: the feature matched using BFmatching
         :param kp1: the keypoints in self.img1
         :param kp2: the keypoints in self.img2
@@ -82,6 +91,33 @@ class Detector:
         kp2Local3D = d2 @ kp2Pix @ cmInv.T
 
         return kp1Local3D, kp2Local3D
+
+    def img_to_3D(self, low=100, high=6000):
+        """
+        compute the local 3d coordinates of self.img1, ignore depth < low or > high
+        :param low: the lower bound, depth values below low is ignored
+        :param high: the upper bound, depth values above high is ignored
+        :return: matrix containing the local 3D coordinates of the scene
+        """
+        h, w = self.img1.shape[:2]
+        pc1 = np.zeros((h*w, 3))
+        cmInv = np.linalg.pinv(self.camMat)
+        cm = cmInv.T
+
+        p = np.ones((w, 3))
+        p[:, 0] = np.arange(w)
+
+        for i in range(h):
+            p[:, 1] = np.ones(w) * i
+            pcm = p @ cm
+
+            d1 = self.depth1[i]
+            d1 = np.where(np.logical_and(d1 > low, d1 < high), d1, 0)
+            d1 = np.diag(d1.flatten())
+
+            pc1[i * w : (i + 1) * w] = d1 @ pcm
+
+        return pc1
 
     def get_rigid_transform(self, A, B):
         """
@@ -164,21 +200,15 @@ class Detector:
             return R, T, bestInliers
 
 
-    def detect(self):
+    def detect_2D(self, kp1, kp2, good):
         """
-        detect the moving objects bases on img1 and img2
-        :return: a binary image with static environment 0 and moving objects 1
+        detect the moving objects based on img1 and img2 using homography
+        assuming that the camera motion is small or no motion, otherwise, the camera motion will be counted
+        :param kp1: keypoints in img1
+        :param kp2: keypoints in img2
+        :param good: good matches from ratio test
+        :return: an image of moving objects
         """
-        # extract and match features
-        kp1, des1, kp2, des2 = self.feature_extraction()
-        matches = self.fMatcher.knnMatch(des2, des1, k=2)
-
-        # apply ratio test
-        good = []
-        for m, n in matches:
-            if m.distance < 0.75 * n.distance:
-                good.append(m)
-
         # extract pixel coordinates of good matched features
         num = len(good)
         pts1 = np.zeros((num, 2), dtype=np.float32)
@@ -190,46 +220,118 @@ class Detector:
 
         # compute homography
         H, mask = cv2.findHomography(pts1, pts2, cv2.RANSAC)
-        size = self.img1.shape
+        size = self.img1.shape[:2]
         img1 = cv2.warpPerspective(self.img1, H, (size[1], size[0]))
 
         # compare the warpped image with self.img2
         # apply gaussianblur to smooth the images
-        img1_blur = cv2.GaussianBlur(img1, (5, 5), 0)
-        img2_blur = cv2.GaussianBlur(self.img2, (5, 5), 0)
+        img1Blur = cv2.GaussianBlur(img1, (5, 5), 0)
+        img2Blur = cv2.GaussianBlur(self.img2, (5, 5), 0)
 
         # bias/gain normalization
-        img1 = (img1_blur - np.mean(img1_blur)) / np.std(img1_blur)
-        img2 = (img2_blur - np.mean(img2_blur)) / np.std(img2_blur)
+        img1 = (img1Blur - np.mean(img1Blur)) / np.std(img1Blur)
+        img2 = (img2Blur - np.mean(img2Blur)) / np.std(img2Blur)
 
         diff = (np.abs(img1 - img2) * 255).astype(np.uint8)
-        if np.max(diff) - np.min(diff) >= 250:
-            result = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-        else:
-            result = np.zeros(img2.shape)
+        # if np.max(diff) - np.min(diff) >= 250:
+        #     result = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        # else:
+        #     result = np.zeros(img2.shape)
 
-        return result
+        return cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
+    def detect_3D(self, kp1, kp2, good):
+        """
+        detect the moving objects based on depth1 and depth2 using multiview geometry
+        assuming that the camera is calibrated
+        :param kp1: keypoints in img1
+        :param kp2: keypoints in img2
+        :param good: good matches from ratio test
+        :return: an image of moving objects
+        """
+
+        # estimate rigid body transformation
+        kp1, kp2 = self.compute3D(good, kp1, kp2)
+        R, T, _ = self.estimate_rigid_transform(kp1, kp2)
+
+        # create a point cloud, dim = (h*w, 3)
+        low, high = 0, np.max(self.depth1)
+        pc1 = self.img_to_3D(low, high)
+
+        # project point cloud one onto the projection plane for frame two
+        pc1 = self.camMat @ (R @ pc1.T + T)
+
+        # convert the point cloud in the local coordinate frame of img2 into a depth array
+        h, w = self.depth1.shape[:2]
+        z = (pc1[2]).astype(np.uint16)
+        coords = (pc1[:2] / pc1[2]).astype(int)
+
+        depth = np.zeros((h, w))
+        for i in range(pc1.shape[1]):
+            c, r = coords[:, i]
+            if 0 <= c < w and 0 <= r < h:
+                depth[r, c] = z[i]
+
+        # smooth the depth array, apply bias/gain normalization
+        d1Blur = cv2.GaussianBlur(depth, (9, 7), 0)
+        d1 = (d1Blur - np.mean(d1Blur)) / np.std(d1Blur)
+        d2 = (self.depth2 - np.mean(self.depth2)) / np.std(self.depth2)
+
+        # compare the reprojected depth array to the original depth two
+        diff = np.abs(d1 - d2)
+        diff = (diff * 255).astype(np.uint8)
+        return cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+    def detect(self):
+        """
+        detect the moving objects based on depth1 and depth2 using multiview geometry, img1 and img2 using homography
+        assuming that the camera is calibrated, and the camera motion is small
+        :return: an image of moving objects
+        """
+        kp1, kp2, matches = self.match()
+        res2D = self.detect_2D(kp1, kp2, matches)
+        res3D = self.detect_3D(kp1, kp2, matches)
+
+        # apply l1 norm
+        return ((res2D * 0.5 + res3D * 0.5) > 200) * 255
 
 def main():
     filename = 'videos/walking.MOV'
     video = io.vread(filename, as_grey=True)
 
+    depths = []
+    for i in range(70, 340):
+        filename = 'imgs/{}_cam-depth_array_.png'.format(i)
+        d = cv2.imread(filename, -1)
+        d = cv2.GaussianBlur(d, (9, 7), 0)
+        depths.append(d)
+
     imgs = []
+    offset = 5
     failure = 0
     for i, frame in enumerate(video):
+        print(i)
         frame = frame[:, :, 0]
-        if i < 3:
-            detected = np.zeros(frame.shape)
+        if i < offset:
+            res = np.zeros(frame.shape)
+            res2 = np.zeros(frame.shape)
+            res3 = np.zeros(frame.shape)
         else:
             try:
-                det = Detector(video[i-3], frame)
-                detected = det.detect()
+                detector = Detector(video[i - offset], frame, depths[i - offset], depths[i])
+                res = detector.detect()
+                kp1, kp2, matches = detector.match()
+                res2 = detector.detect_2D(kp1, kp2, matches)
+                res3 = detector.detect_3D(kp1, kp2, matches)
             except:
                 failure += 1
-                detected = np.zeros(frame.shape)
+                res = np.zeros(frame.shape)
+                res2 = np.zeros(frame.shape)
+                res3 = np.zeros(frame.shape)
 
-        img = np.vstack((frame, detected))
+        top = np.hstack((frame, res))
+        bottom = np.hstack((res2, res3))
+        img = np.vstack((top, bottom))
         imgs.append(img)
     print("failure: ", failure)
     io.vwrite('walking_detected.MOV', imgs)
