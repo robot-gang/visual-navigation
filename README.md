@@ -40,7 +40,7 @@ channels:
 channel_priority: strict
 ```
 
-- Pull the latest code from the repository: `git pull`
+- Pull the latest code from the repository: `git pull --rebase`
     + If there are conflicts, you should resolve them all before doing
     the next step.
 - Run this following command (at the same directory with the
