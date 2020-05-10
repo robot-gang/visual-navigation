@@ -1,0 +1,156 @@
+<!-- Live Demo -->
+<br><br>
+<center><h2>Live Demo</h2></center>
+<table align="center" width="100%" class="live_demo">
+    <tbody><tr>
+        <td width="25%">
+              <center class="live_demo_label">Top View</center>
+                <img class="live_demo_round" style="width:95%" id="humanav_topview_img" src="./index_files/default_topview.png">
+        </td>
+        <td width="25%">
+              <center class="live_demo_label">RGB</center>
+                <img class="live_demo_round" style="width:95%" id="humanav_rgb_img" src="./index_files/default_rgb.png">
+        </td>
+        <td width="25%">
+              <center class="live_demo_label">Depth</center>
+                <img class="live_demo_round" style="width:95%" id="humanav_depth_img" src="./index_files/default_depth.png">
+        </td>
+    </tr>
+</tbody>
+</table>
+
+<br>
+<div class="live_demo_control_panel">
+  <center class="live_demo_top_label">Control Panel</center>
+
+  <div class="collapsible_content">
+    <div class="new_states">
+      <!-- <img class="live_demo_round_v2" style="width:35%" id="humanav_topview_img" src="./resources/images/humanav_demo/human_visible/default_topview.png"/> -->
+      <img class="live_demo_round_v2" style="width:35%" id="humanav_topview_unoccupied_img" src="./index_files/default_topview_unoccupied.png">
+      <img class="live_demo_robot_icon" id="topview_img_robot_icon" src="./index_files/robot_icon.png">
+      <img class="live_demo_human_icon" id="topview_img_human_icon" src="./index_files/human_icon.png">
+    </div>
+    <table>
+      <tbody><tr>
+          <td><div class="live_demo_control_panel_text">Camera Location <i class="live_demo_control_panel_text_small&quot;">[X, Y, Θ]</i></div></td>
+        </tr>
+      </tbody></table>
+      <table>
+        <tbody><tr>
+            <td class="topview_animation_td"><input type="range" min="-100" max="100" id="robot_relative_x_coor" onchange="changeRobotXState()" value="0"></td>
+            <td class="topview_animation_td"><input type="range" min="-100" max="100" id="robot_relative_y_coor" onchange="changeRobotYState()" value="0"></td>
+            <td class="topview_animation_td"><input type="range" min="-100" max="100" id="robot_relative_theta_coor" onchange="changeRobotThetaState()" value="41"></td>
+          </tr>
+        </tbody></table>
+        <table>
+          <tbody><tr>
+              <!-- <td><button type="button" class="live_demo_control_panel_button">Change Human Location</button></td> -->
+              <td><div class="live_demo_control_panel_text">Human Location <i class="live_demo_control_panel_text_small&quot;">[X, Y, Θ]</i></div></td>
+            </tr></tbody></table><table>
+              <tbody><tr>
+                  <td class="topview_animation_td"><input type="range" min="-100" max="100" value="10" id="human_relative_x_coor" onchange="changeHumanXState()"></td>
+                  <td class="topview_animation_td"><input type="range" min="-100" max="100" value="45" id="human_relative_y_coor" onchange="changeHumanYState()"></td>
+                  <td class="topview_animation_td"><input type="range" min="-100" max="100" value="-50" id="human_relative_theta_coor" onchange="changeHumanThetaState()"></td>
+                </tr>
+              </tbody></table>
+
+              <table>
+                <tbody><tr>
+                    <!-- <td><button type="button" class="live_demo_control_panel_button" id="change_human_speed" onClick="changeHumanSpeed()">Change Human Speed</button></td> -->
+                    <td><div class="live_demo_control_panel_text">Human Speed <i class="live_demo_control_panel_text_small&quot;" id="current_human_speed_text">(.60 m/s)</i></div></td>
+                  </tr>
+                  <tr>
+                    <td class="topview_animation_td"><input type="range" id="human_speed" onchange="changeHumanSpeed()" min="0" max="60" value="60"></td>
+                  </tr>
+                </tbody></table>
+                <p class="live_demo_control_panel_text_v2" style="margin-block-end:.25em;"> Change Human Attributes</p><table>
+                  <tbody><tr>
+
+                    </tr>
+                    <tr>
+                      <td class="live_demo_control_panel_slider_container">
+                        <p class="live_demo_control_panel_text"> Gender</p>
+                        <label class="switch">
+                          <input id="change_human_gender" type="checkbox">
+                          <span class="slider round"></span>
+                        </label>
+                      </td>
+                      <td class="live_demo_control_panel_slider_container">
+                        <p class="live_demo_control_panel_text"> Body Shape*</p>
+                        <label class="switch">
+                          <input id="change_human_body_shape" type="checkbox">
+                          <span class="slider round"></span>
+                        </label>
+
+                      </td>
+                      <td class="live_demo_control_panel_slider_container">
+                        <p class="live_demo_control_panel_text"> Texture*</p>
+                        <label class="switch">
+                          <input id="change_human_texture" type="checkbox">
+                          <span class="slider round"></span>
+                        </label>
+
+                      </td>
+                      <td class="live_demo_control_panel_slider_container">
+                        <p class="live_demo_control_panel_text"> Appearance*</p>
+                        <label class="switch">
+                          <input id="change_human_appearance" type="checkbox">
+                          <span class="slider round"></span>
+                        </label>
+
+                      </td>
+                    </tr>
+                  </tbody></table>
+                  <table>
+                    <tbody><tr>
+                        <!-- <td>
+                          <p class="live_demo_control_panel_text"> Change Human Identity</p>
+                          <label class="switch">
+                          <input id="change_human_identity" type="checkbox">
+                          <span class="slider round"></span>
+                          </label>
+
+                          </td>
+
+                          <td>
+                          <p class="live_demo_control_panel_text"> Change Human Pose</p>
+                          <label class="switch">
+                          <input id="change_human_pose" type="checkbox">
+                          <span class="slider round"></span>
+                          </label>
+
+                          </td> -->
+
+                          <td>
+                            <p class="live_demo_control_panel_text_v2" style="padding-top: 15px;"> Show Human</p>
+                            <label class="switch">
+                              <input id="change_human_visibility" onclick="changeHumanVisibility()" type="checkbox" checked="">
+                              <span class="slider round"></span>
+                            </label>
+
+                          </td>
+
+
+                      </tr>
+                    </tbody></table>
+
+                    <button type="button" class="live_demo_control_panel_button" onclick="renderImages()">Render</button>
+  </div>
+</div>
+
+<table align="center" width="65%">
+  <tbody>
+    <tr>
+      <td>
+        <center>
+          <span style="font-size:14px"><i>
+              <span style="font-weight:bold">*</span> When changing attributes of the human such as body shape (tall, stocky, etc.), texture (clothing, hair, facial features, skin color, etc.), and appearance (pose of the human skeleton) we randomly sample new values from the HumaNav dataset. The HumaNav dataset also allows for user specification of all of these attributes- please see the HumaNav github page for more information. HumaNav uses synthetic humans from the <a href="https://www.di.ens.fr/willow/research/surreal/data/">SURREAL</a> dataset directly; however, in the future, we would like to contribute towards improving the diversity in the human skin color, sizes, and shapes in the HumaNav dataset.
+            </i></span>
+        </center>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
