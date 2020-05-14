@@ -233,12 +233,12 @@ class Detector:
         img2 = (img2Blur - np.mean(img2Blur)) / np.std(img2Blur)
 
         diff = (np.abs(img1 - img2) * 255).astype(np.uint8)
-        # if np.max(diff) - np.min(diff) >= 250:
-        #     result = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-        # else:
-        #     result = np.zeros(img2.shape)
+        if np.max(diff) - np.min(diff) >= 250:
+            result = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        else:
+            result = np.zeros(img2.shape)
 
-        return cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        return result
 
     def detect_3D(self, kp1, kp2, good):
         """
@@ -293,6 +293,8 @@ class Detector:
         res3D = self.detect_3D(kp1, kp2, matches)
 
         # apply l1 norm
+        if np.array_equal(res2D, np.zeros(res2D.shape)):
+            return res2D
         return ((res2D * 0.5 + res3D * 0.5) > 200) * 255
 
 def main():
