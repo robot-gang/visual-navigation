@@ -194,7 +194,7 @@ def example2():
     print('success')
 
 
-def generate_movement_sequence(area, c_pos, h_pos, h_speed, c_speed, identity, pose, total_time, num_images, out_dir, seq_name):
+def generate_movement_sequence(area, h_speed, c_speed, identity, pose, total_time, num_images, out_dir, seq_name):
     """
     -Code to load a sequence of images for a moving object.
     -For now we assume that the camera is fixed and the person is moving in a straight line.
@@ -302,5 +302,5 @@ if __name__ == '__main__':
     #example2() 
     
     generate_movement_sequence(area='area3', h_speed=1, c_speed=0.4, identity=48, 
-                                pose=20, total_time=1, num_images=2, 
-                                out_dir='/home/shawnshact/ucb/ee106b/seq', seq_name='test_moving')
+                                pose=20, total_time=1, num_images=20, 
+                                out_dir='/home/rex/test', seq_name='test_moving')
