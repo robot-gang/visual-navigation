@@ -28,7 +28,6 @@ def main():
             './html/proj/school.html',
             './html/proj/image.html',
             './html/proj/abstract.html',
-            './html/proj/paper.html',
             './html/proj/code.html',
             './html/proj/dataset.html',
             './html/proj/results.html',

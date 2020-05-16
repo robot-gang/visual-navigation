@@ -101,56 +101,26 @@
 
 <!-- Abstract -->
 <hr>
-<center><h1>Abstract</h1></center>
+<center><h1>Overview</h1></center>
 <br>
 <body>
-  In this paper we extend recently proposed solutions for tackling autonomous
+  We extend recently proposed solutions for tackling autonomous
   navigation in unknown environments, and demonstrate a method for identifying
-  dynamic obstacles only using information from an RGB-D camera. We also extend
-  current state-of-the-art methods for quickly generating simulated scenarios in
-  which a robot must navigate to a goal while avoiding moving obstacles. Finally,
-  we propose an approach for combining the identification of dynamic obstacles
-  with these random scenarios to train a network to accurately predict waypoints
-   on the path from a start position to a goal position in unknown environments.
+  dynamic obstacles only using information from an RGB-D camera.
+  we successfully extended the HumANav dataset to allow for a wider
+  range of scenarios that can be used to train our perception module. We designed
+  an algorithm that successfully and accurately detects the moving objects by
+  combining changes in intensity and depth.
+
+  The result of data generation and moving object detection look appealing and
+  encouraging. The end goal is to design and train a neural network for waypoint
+  detection and integrating all modules of our design and applying to hardwares.
+  This would solve the autonomous navigation in dynamic unknown environments with
+  low cost sensors. Especially, it would work for indoor robots which operate
+  at a low speed and the environments are most likely to be dynamic. Warehouse robots
+  would benefit the most.
 </body>
 <br><br>
-<!-- Paper -->
-<hr>
-<!-- <table align=center width=550px> -->
-<center><h1>Paper</h1></center>
-<table align="center" width="650">
-  <tbody>
-    <tr>
-      <!-- <td><a href="https://arxiv.org/pdf/xxxx.xxxxx.pdf"><img style="height:280px;border:2px solid #dddddd; border-radius: 5px;" src="./img/paper.jpg"></a></td> -->
-      #TODO: Add an image of this paper
-      <td>
-        <span style="font-size:14pt">
-          Tran, Li, Shacterman, Han<br><br>
-          Visual Navigation in a Dynamic Environment With Optimal Control as a Supervisor
-        </span>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<br>
-<table align="center" width="180px">
-  <tbody>
-    <tr>
-      <td><span style="font-size:14pt"><center>
-            <a href="https://arxiv.org/pdf/xxxx.xxxxx.pdf">[pdf]</a>
-          </center></span></td>
-
-          <td><span style="font-size:14pt"><center>
-                <a href="https://robot-gang.github.io/visual-navigation/resources/bibtex.bib">[Bibtex]</a>
-              </center></span></td>
-    </tr>
-  </tbody>
-</table>
-<br>
-
-
-
 <!-- Architecture and Code -->
 <hr>
 <center><h1>Architecture &amp; Code</h1></center>
@@ -192,35 +162,109 @@
 <!-- Results -->
 <hr>
 <center><h1>Implementation/Results</h1></center>
-<br>
 <body>
   <h3> Data Generation</h3>
-  <p>For generating data, we use HumANav to generate photorealistic synthetic indoor
-  data. We have written a trajectory class to generating a sequence of images
-  that human moving in a straight line or turning (circle trajectory).</p>
+  <p>
+    For generating data, we use HumANav to generate photorealistic synthetic indoor
+    moving human images. HumANav combines SURREAL engine and Swiftshader engine using
+    SD3DISbuilding data . SURREAL generates synthetic but realisticimages of
+    people, and it also provides RGB data and disparity. HumANav uses the Stanford
+    Large Scale 3D Indoor SpacesDataset, since the mesh in the dataset is
+    independent fromthe rendering engine, HumANav combines the SURREAL human mesh
+    with the S3DIS to generate a synthetic humanimage in an indoor environment.
+    HumANav Dataset contains6000 different human meshes with different poses,
+    genders,body shapes, lighting conditions and velocities.HumANavWe have written
+    a trajectory class to generating a sequence of images that human moving in a
+    straight line or turning (circle trajectory) at a constant velocity. We also
+    write code to random generate human in the environment, and also we add support
+    for multiple human in a scene where HumANav does not support. In the figure
+    above, left is a RGB image, in the middle is a disparity map and on the right
+    is the top down view, and all three images are generated automatically.
+  <br>
   <center>
-  <a href="https://samtron141ad2.github.io/visual-navigation/"><img class="round" style="width:40%" src="./img/Moving_Human_Line.gif"></a>
+    <a href="https://samtron141ad2.github.io/visual-navigation/"><img class="round" style="width:35%; position:left" src="./img/moving_human_line.gif"></a>
+    <a href="https://samtron141ad2.github.io/visual-navigation/"><img class="round" style="width:35%; position:right" src="./img/moving_human_circle.gif"></a>
+  </center>
+  <br>
+  We also write code to random generate human in the environment, and also we
+  add support for multiple human in a scene where HumANav does not support. We
+  make the area around each human darker to indicate more strictive feasible area
+  for the robot.
   <center>
+    <img class="round" style="width:90%" src="./img/multiple_humans.png">
+  </center>
+  </p>
+  <h3> Motion Detection</h3>
+  <p>
+    The input gray-scale images and depth arrays are obtained from an Intel
+    RealSense depth camera D435i, which is mounted on a robot car (designed by
+    the Robot Open Autonomous Racing team) about $10cm$ above the ground.
+  </p>
+  <br>
+  <p>
+    <center>
+      <img class="round" style="width:90%" src="./img/motion_result_0.png">
+    </center>
+  </p>
+  <br>
+  The camera pose has changed by inspecting
+  the tiles on the ground. The bottom intersection of tile lines in B is
+  closer to the image border. The person is walking by inspecting the change
+  of his pose. In the left image, his left hand is shown; whereas his left
+  hand is covered in the right image.
+  <p>
+    <center>
+      <img class="round" style="width:70%" src="./img/motion_result_1.png">
+    </center>
+    Motion detection result: (a), the changes in intensity. It also
+    captures the intensity change of the floor which is caused by the change of
+    camera pose (b), the changes in depth Delta Lambda. The depth is
+    sensitive to the setting of environment. The change of depth captures
+    the border of the walking person and a lot of random stuff from the
+    background. (c), combination of change in intensity and depth produces a
+    better and clean detection, where intensity and depth are weighted equally.
+    <br>
+    <center>
+      <iframe src="https://drive.google.com/file/d/1a-NHYCNLTzaQiCwm-v8LtMOXBqZc2V_Y/preview" width="640" height="480"></iframe>
+    </center>
+  </p>
 </body>
-<br>
 <!-- Conclusion -->
 <hr>
 <center><h1>Conclusion</h1></center>
 <br>
-#TODO: Add a conclusion
+In this project, we successfully extended the HumANav dataset to allow for a wider
+range of scenarios that can be used to train our perception module. Rather than having
+our obstacles take an optimal trajectory, our dataset allows us to set arbitrary
+trajectories along the free space of the occupancy map. Our approach of combining changes
+in intensity and depth successfully detects the moving objects. Changes in intensity
+captures both the motion of object and camera. Changes in depth captures the border of
+the moving objects. Linear combination of intensity and depth produces a cleaner
+detection better than either of them.
+
+The main chanllege of detecting moving objects is how to compare two RGB/grayscale
+images or depth arrays. The first task is to make sure that those two input intenseity
+are viewed in the same projection plane, and the two input depth array are seen from the
+same camera pose. It was solved by using perspective warping and reprojection. It took a long
+time to find out that Gaussian filter and normalization before comparison are crucial. 
+
+More work needs to be done in determining a good method for sampling different
+obstacle trajectories that the vehicle is likely to encounter in the real world.
+his will be essential in generating a good dataset that our perception module can learn
+and generalize from. We also need to experiment with different neural networks in the
+perception module. At the moment, we are unsure whether a normal CNN, a CNN-LSTM,
+or something different like a temporal CNN will generalize well in this task
+(and ideally perform well in real-time).
 <br><br>
-
-
-
 <!-- Team Bios -->
 <hr>
 <center><h1>Team Bios</h1></center>
 <br>
-#TODO: Add team bios
+Zuyong Li, a senior EECS student who is graduating in Spring 2020. He is interested
+in Robotics, computer vision and machine learning. He worked mainly for moving object
+detection algorithm design, and implemented the algorithm together with Son Tran. He
+also collected the data for moving object detection using a ROAR car. 
 <br><br>
-
-
-
 <!-- Acknowledgements -->
 <hr>
 <table align="center" width="1100px">
@@ -230,7 +274,10 @@
         <left>
         <center><h1>Acknowledgements</h1></center>
 
-        #TODO: Add acknowledgements
+        We thank Professor Shankar Sastry and the course staff for assistance with the project
+        idea for the problem. We thank the Robot Open Autonomous Racing team for providing us a
+        robot car and calibrating the RealSense camera. We also thank Nghia Ho for sharing the code
+        how to compute the rigid body transformation for given 3D correspondence points.
 
         <br>
         <br>
