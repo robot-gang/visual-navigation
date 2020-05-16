@@ -1,15 +1,22 @@
 <!-- Abstract -->
 <hr>
-<center><h1>Abstract</h1></center>
+<center><h1>Overview</h1></center>
 <br>
 <body>
-  In this paper we extend recently proposed solutions for tackling autonomous
+  We extend recently proposed solutions for tackling autonomous
   navigation in unknown environments, and demonstrate a method for identifying
-  dynamic obstacles only using information from an RGB-D camera. We also extend
-  current state-of-the-art methods for quickly generating simulated scenarios in
-  which a robot must navigate to a goal while avoiding moving obstacles. Finally,
-  we propose an approach for combining the identification of dynamic obstacles
-  with these random scenarios to train a network to accurately predict waypoints
-   on the path from a start position to a goal position in unknown environments.
+  dynamic obstacles only using information from an RGB-D camera.
+  we successfully extended the HumANav dataset to allow for a wider
+  range of scenarios that can be used to train our perception module. We designed
+  an algorithm that successfully and accurately detects the moving objects by
+  combining changes in intensity and depth.
+
+  The result of data generation and moving object detection look appealing and
+  encouraging. The end goal is to design and train a neural network for waypoint
+  detection and integrating all modules of our design and applying to hardwares.
+  This would solve the autonomous navigation in dynamic unknown environments with
+  low cost sensors. Especially, it would work for indoor robots which operate
+  at a low speed and the environments are most likely to be dynamic. Warehouse robots
+  would benefit the most.
 </body>
 <br><br>
