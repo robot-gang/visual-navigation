@@ -11,6 +11,12 @@ captures both the motion of object and camera. Changes in depth captures the bor
 the moving objects. Linear combination of intensity and depth produces a cleaner
 detection better than either of them.
 
+The main chanllege of detecting moving objects is how to compare two RGB/grayscale
+images or depth arrays. The first task is to make sure that those two input intenseity
+are viewed in the same projection plane, and the two input depth array are seen from the
+same camera pose. It was solved by using perspective warping and reprojection. It took a long
+time to find out that Gaussian filter and normalization before comparison are crucial. 
+
 More work needs to be done in determining a good method for sampling different
 obstacle trajectories that the vehicle is likely to encounter in the real world.
 his will be essential in generating a good dataset that our perception module can learn
