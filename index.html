@@ -196,6 +196,30 @@
   </p>
   <h3> Motion Detection</h3>
   <p>
+  For motion detection, there are four main parts shaded in pink in the diagram:
+  feature matching, detecting changes in intensity, detecting changes in depth, and
+  combination of changes in intensity and depth. To match the features, we use FAST
+  detector, BRIEF descriptor, and BFMatcher with 2 nearest neighbors and apply ratio
+  test to determine the good matches. To detect changes in intensity, we run ransac
+  on the matched features to estimate homography matrix H and use H to warp image A
+  into image B's projection plane to obtain A'. Apply Gaussian filter and normalize
+  A' and B, then do the subtraction to get the change. To detect changes in intensity,
+  we run first convert the feature points to its local 3D coordinates using depth
+  arrays A and B (the have the same name because the math and scheme are the same).
+  Then we can estimate the rigid body transformation (R, t) of the camera by runing ransac
+  on the local 3D correspondence points. Depth A is reprojected into B's local frame
+  A'. Apply Gaussian filter and normalize A' and B, then do the subtraction. The
+  absolute value of the difference is the change in depth. To combine the result of
+  changes in intensity and depth, simply do a linear combination, or average of change
+  in intensity and depth. Applying a threshold produces the output.
+  </p>
+  <br>
+  <p>
+    <center>
+      <img class="round" style="width:90%" src="./img/flowchart.png">
+    </center>
+  </p>
+  <p>
     The input gray-scale images and depth arrays are obtained from an Intel
     RealSense depth camera D435i, which is mounted on a robot car (designed by
     the Robot Open Autonomous Racing team) about $10cm$ above the ground.
