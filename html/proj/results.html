@@ -1,14 +1,70 @@
 <!-- Results -->
 <hr>
 <center><h1>Implementation/Results</h1></center>
-<br>
 <body>
   <h3> Data Generation</h3>
-  <p>For generating data, we use HumANav to generate photorealistic synthetic indoor
-  data. We have written a trajectory class to generating a sequence of images
-  that human moving in a straight line or turning (circle trajectory).</p>
+  <p>
+    For generating data, we use HumANav to generate photorealistic synthetic indoor
+    moving human images. HumANav combines SURREAL engine and Swiftshader engine using
+    SD3DISbuilding data . SURREAL generates synthetic but realisticimages of
+    people, and it also provides RGB data and disparity. HumANav uses the Stanford
+    Large Scale 3D Indoor SpacesDataset, since the mesh in the dataset is
+    independent fromthe rendering engine, HumANav combines the SURREAL human mesh
+    with the S3DIS to generate a synthetic humanimage in an indoor environment.
+    HumANav Dataset contains6000 different human meshes with different poses,
+    genders,body shapes, lighting conditions and velocities.HumANavWe have written
+    a trajectory class to generating a sequence of images that human moving in a
+    straight line or turning (circle trajectory) at a constant velocity. We also
+    write code to random generate human in the environment, and also we add support
+    for multiple human in a scene where HumANav does not support. In the figure
+    above, left is a RGB image, in the middle is a disparity map and on the right
+    is the top down view, and all three images are generated automatically.
+  <br>
   <center>
-  <a href="https://samtron141ad2.github.io/visual-navigation/"><img class="round" style="width:40%" src="./img/Moving_Human_Line.gif"></a>
+    <a href="https://samtron141ad2.github.io/visual-navigation/"><img class="round" style="width:35%; position:left" src="./img/moving_human_line.gif"></a>
+    <a href="https://samtron141ad2.github.io/visual-navigation/"><img class="round" style="width:35%; position:right" src="./img/moving_human_circle.gif"></a>
+  </center>
+  <br>
+  We also write code to random generate human in the environment, and also we
+  add support for multiple human in a scene where HumANav does not support. We
+  make the area around each human darker to indicate more strictive feasible area
+  for the robot.
   <center>
+    <img class="round" style="width:90%" src="./img/multiple_humans.png">
+  </center>
+  </p>
+  <h3> Motion Detection</h3>
+  <p>
+    The input gray-scale images and depth arrays are obtained from an Intel
+    RealSense depth camera D435i, which is mounted on a robot car (designed by
+    the Robot Open Autonomous Racing team) about $10cm$ above the ground.
+  </p>
+  <br>
+  <p>
+    <center>
+      <img class="round" style="width:90%" src="./img/motion_result_0.png">
+    </center>
+  </p>
+  <br>
+  The camera pose has changed by inspecting
+  the tiles on the ground. The bottom intersection of tile lines in B is
+  closer to the image border. The person is walking by inspecting the change
+  of his pose. In the left image, his left hand is shown; whereas his left
+  hand is covered in the right image.
+  <p>
+    <center>
+      <img class="round" style="width:70%" src="./img/motion_result_1.png">
+    </center>
+    Motion detection result: (a), the changes in intensity. It also
+    captures the intensity change of the floor which is caused by the change of
+    camera pose (b), the changes in depth Delta Lambda. The depth is
+    sensitive to the setting of environment. The change of depth captures
+    the border of the walking person and a lot of random stuff from the
+    background. (c), combination of change in intensity and depth produces a
+    better and clean detection, where intensity and depth are weighted equally.
+    <br>
+    <center>
+      <iframe src="https://drive.google.com/file/d/1a-NHYCNLTzaQiCwm-v8LtMOXBqZc2V_Y/preview" width="640" height="480"></iframe>
+    </center>
+  </p>
 </body>
-<br>
