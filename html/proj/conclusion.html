@@ -2,8 +2,26 @@
 <hr>
 <center><h1>Conclusion</h1></center>
 <br>
-#TODO: Add a conclusion
+In this project, we successfully extended the HumANav dataset to allow for a wider
+range of scenarios that can be used to train our perception module. Rather than having
+our obstacles take an optimal trajectory, our dataset allows us to set arbitrary
+trajectories along the free space of the occupancy map. Our approach of combining changes
+in intensity and depth successfully detects the moving objects. Changes in intensity
+captures both the motion of object and camera. Changes in depth captures the border of
+the moving objects. Linear combination of intensity and depth produces a cleaner
+detection better than either of them.
+
+The main chanllege of detecting moving objects is how to compare two RGB/grayscale
+images or depth arrays. The first task is to make sure that those two input intenseity
+are viewed in the same projection plane, and the two input depth array are seen from the
+same camera pose. It was solved by using perspective warping and reprojection. It took a long
+time to find out that Gaussian filter and normalization before comparison are crucial. 
+
+More work needs to be done in determining a good method for sampling different
+obstacle trajectories that the vehicle is likely to encounter in the real world.
+his will be essential in generating a good dataset that our perception module can learn
+and generalize from. We also need to experiment with different neural networks in the
+perception module. At the moment, we are unsure whether a normal CNN, a CNN-LSTM,
+or something different like a temporal CNN will generalize well in this task
+(and ideally perform well in real-time).
 <br><br>
-
-
-
