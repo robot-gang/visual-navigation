@@ -222,32 +222,38 @@
   <p>
     The input gray-scale images and depth arrays are obtained from an Intel
     RealSense depth camera D435i, which is mounted on a robot car (designed by
-    the Robot Open Autonomous Racing team) about $10cm$ above the ground.
-  </p>
-  <br>
-  <p>
+    the Robot Open Autonomous Racing team) about 10cm above the ground.
+
+    <br>
+    The camera pose has changed by inspecting
+    the tiles on the ground. The bottom intersection of tile lines in B is
+    closer to the image border. The person is walking by inspecting the change
+    of his pose. In the left image, his left hand is shown; whereas his left
+    hand is covered in the right image.
+
+    <br>
     <center>
       <a href="https://samtron141ad2.github.io/visual-navigation/"><img class="round" style="width:90%" src="./img/motion_result_0.png"></a>
     </center>
   </p>
-  <br>
-  The camera pose has changed by inspecting
-  the tiles on the ground. The bottom intersection of tile lines in B is
-  closer to the image border. The person is walking by inspecting the change
-  of his pose. In the left image, his left hand is shown; whereas his left
-  hand is covered in the right image.
   <p>
+  Motion detection result: (a), the changes in intensity. It also
+  captures the intensity change of the floor which is caused by the change of
+  camera pose (b), the changes in depth Delta Lambda. The depth is
+  sensitive to the setting of environment. The change of depth captures
+  the border of the walking person and a lot of random stuff from the
+  background. (c), combination of change in intensity and depth produces a
+  better and clean detection, where intensity and depth are weighted equally.
+  <br>
     <center>
       <a href="https://samtron141ad2.github.io/visual-navigation/"><img class="round" style="width:70%" src="./img/motion_result_1.png"></a>
     </center>
-    Motion detection result: (a), the changes in intensity. It also
-    captures the intensity change of the floor which is caused by the change of
-    camera pose (b), the changes in depth Delta Lambda. The depth is
-    sensitive to the setting of environment. The change of depth captures
-    the border of the walking person and a lot of random stuff from the
-    background. (c), combination of change in intensity and depth produces a
-    better and clean detection, where intensity and depth are weighted equally.
-    <br>
+    </p>
+    <p>
+    The video consists of four parts. The top left is the input grayscale images,
+    the top right the result of combination of changes in intensity and depth, the
+    bottom left is the changes in intenstiy, and the bottom right is the changes
+    in depth. 
     <center>
       <iframe src="https://drive.google.com/file/d/1a-NHYCNLTzaQiCwm-v8LtMOXBqZc2V_Y/preview" width="640" height="480"></iframe>
     </center>
