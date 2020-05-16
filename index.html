@@ -47,7 +47,7 @@
 
       <td align="center" width="100px">
         <center>
-          <span style="font-size:20px"><a href="">Zuyong Li*<sup>1</sup></a></span>
+          <span style="font-size:20px"><a href="">Zuyong Li<sup>1</sup></a></span>
         </center>
       </td>
 
@@ -59,15 +59,12 @@
 
       <td align="center" width="100px">
         <center>
-          <span style="font-size:20px"><a href="">Yuanrong Han<sup>1</sup></a></span>
+          <span style="font-size:20px"><a href="https://www.linkedin.com/in/rexhanh/">Yuanrong Han</a></span>
         </center>
       </td>
     </tr>
   </tbody>
 </table>
-
-
-
 <!-- School -->
 <br>
 <table align="center" width="700px">
@@ -106,11 +103,17 @@
 <hr>
 <center><h1>Abstract</h1></center>
 <br>
-#TODO: Add an abstract for this paper
+<body>
+  In this paper we extend recently proposed solutions for tackling autonomous
+  navigation in unknown environments, and demonstrate a method for identifying
+  dynamic obstacles only using information from an RGB-D camera. We also extend
+  current state-of-the-art methods for quickly generating simulated scenarios in
+  which a robot must navigate to a goal while avoiding moving obstacles. Finally,
+  we propose an approach for combining the identification of dynamic obstacles
+  with these random scenarios to train a network to accurately predict waypoints
+   on the path from a start position to a goal position in unknown environments.
+</body>
 <br><br>
-
-
-
 <!-- Paper -->
 <hr>
 <!-- <table align=center width=550px> -->
@@ -165,36 +168,27 @@
 
 <!-- Dataset -->
 <hr>
-<center><h1>Name</h1></center>
+<center><h1>Dataset</h1></center>
 <center>
   <!-- <a href="https://github.com/robot-gang/visual-navigation"><img class="round" style="width:70%" src="./img/dataset.jpg"></a> -->
-  #TODO: Add an image for the dataset
+  <a href="https://samtron1412.github.io/visual-navigation/"><img class="round" style="width:70%" src="./img/data_gen.png"></a>
 </center>
 <br>
-#TODO: Add some description for the dataset
-<!-- To address challenges of training visual navigation agents -->
-<!-- around humans, in this paper we introduce the Human -->
-<!-- Active Navigation Dataset (HumANav), an active dataset for -->
-<!-- navigation around humans in photo-realistic environments. The dataset consists of scans -->
-<!-- of 6000 synthetic but realistic humans from the <a href="https://www.di.ens.fr/willow/research/surreal/data/">SURREAL</a> -->
-<!-- dataset placed in office buildings from <a href="http://buildingparser.stanford.edu/dataset.html">Stanford Large -->
-<!--   Scale 3D Indoor Spaces Dataset</a>, though in principal scans -->
-<!-- from any indoor office environment can be used. HumANav -->
-<!-- allows for user manipulation of human agents within the -->
-<!-- building and provides photorealistic renderings (RGB, Depth, -->
-<!-- Surface Normals, etc.) via a standard perspective projection -->
-<!-- camera. Critically, HumANav also ensures important visual -->
-<!-- cues associated with human movement are present in images -->
-<!-- (i.e. if a human is walking quickly its legs will be far apart), -->
-<!-- facilitating reasoning about human motion. -->
+  <body>
+     we decide to use HumANav to generate synthetic human and environment to make
+     data generation easier. So HumANav Dataset. It combines SURREAL engine and
+     Swiftshader engine using SD3DIS building data. SURREAL generates synthetic
+     but realistic images of people, and it also provides RGB data and disparity.
+     HumANav uses the Stanford Large Scale 3d Indoor Spaces Dataset, since the mesh
+     in the dataset is independent from the rendering engine, HumANav combines the
+     SURREAL human mesh with the S3DIS to generate a synthetic human image in an
+     indoor environment.
+  </body>
 
 <br>
 <center>
   <span style="font-size:28px">&nbsp;<a href="https://github.com/robot-gang/visual-navigation">[GitHub]</a></span>
 </center>
-
-
-
 <!-- Results -->
 <hr>
 <center><h1>Results (Simulation)</h1></center>

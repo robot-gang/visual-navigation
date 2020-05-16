@@ -1,27 +1,21 @@
 <!-- Dataset -->
 <hr>
-<center><h1>dataset</h1></center>
+<center><h1>Dataset</h1></center>
 <center>
   <!-- <a href="https://github.com/robot-gang/visual-navigation"><img class="round" style="width:70%" src="./img/dataset.jpg"></a> -->
-  #TODO: Add an image for the dataset
+  <a href="https://samtron1412.github.io/visual-navigation/"><img class="round" style="width:70%" src="./img/data_gen.png"></a>
 </center>
 <br>
-#TODO: Add some description for the dataset
-<!-- To address challenges of training visual navigation agents -->
-<!-- around humans, in this paper we introduce the Human -->
-<!-- Active Navigation Dataset (HumANav), an active dataset for -->
-<!-- navigation around humans in photo-realistic environments. The dataset consists of scans -->
-<!-- of 6000 synthetic but realistic humans from the <a href="https://www.di.ens.fr/willow/research/surreal/data/">SURREAL</a> -->
-<!-- dataset placed in office buildings from <a href="http://buildingparser.stanford.edu/dataset.html">Stanford Large -->
-<!--   Scale 3D Indoor Spaces Dataset</a>, though in principal scans -->
-<!-- from any indoor office environment can be used. HumANav -->
-<!-- allows for user manipulation of human agents within the -->
-<!-- building and provides photorealistic renderings (RGB, Depth, -->
-<!-- Surface Normals, etc.) via a standard perspective projection -->
-<!-- camera. Critically, HumANav also ensures important visual -->
-<!-- cues associated with human movement are present in images -->
-<!-- (i.e. if a human is walking quickly its legs will be far apart), -->
-<!-- facilitating reasoning about human motion. -->
+  <body>
+     We decide to use HumANav to generate synthetic human and environment to make
+     data generation easier. So HumANav Dataset. It combines SURREAL engine and
+     Swiftshader engine using SD3DIS building data. SURREAL generates synthetic
+     but realistic images of people, and it also provides RGB data and disparity.
+     HumANav uses the Stanford Large Scale 3d Indoor Spaces Dataset, since the mesh
+     in the dataset is independent from the rendering engine, HumANav combines the
+     SURREAL human mesh with the S3DIS to generate a synthetic human image in an
+     indoor environment.
+  </body>
 
 <br>
 <center>
